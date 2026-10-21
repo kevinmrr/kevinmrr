@@ -1,0 +1,132 @@
+# Kopiere diese Datei nach config.yaml und passe sie an.
+# Zugangsdaten gehören NICHT hierher, sondern in die .env-Datei.
+
+# demo = Spielgeld-Konto von Trading 212 (empfohlen zum Testen)
+# live = Echtgeld. Erfordert zusätzlich T212_LIVE_CONFIRM=I_ACCEPT_THE_RISK in der .env
+environment: demo
+
+# true = es werden keine Orders gesendet, nur geloggt, was der Bot tun würde
+dry_run: false
+
+universe:
+  # Yahoo-Finance-Symbole (US-Aktien). Der Bot sucht automatisch das passende
+  # Trading-212-Instrument (z. B. AMD -> AMD_US_EQ).
+  # Die Liste enthält liquide Wachstumswerte mit mittlerer bis erhöhter Volatilität.
+  watchlist:
+    - AAPL
+    - MSFT
+    - NVDA
+    - AMD
+    - AMZN
+    - GOOGL
+    - META
+    - TSLA
+    - AVGO
+    - CRM
+    - ADBE
+    - NFLX
+    - ORCL
+    - NOW
+    - PANW
+    - CRWD
+    - SNOW
+    - DDOG
+    - NET
+    - SHOP
+    - UBER
+    - ABNB
+    - PLTR
+    - MU
+    - QCOM
+    - AMAT
+    - LRCX
+    - MRVL
+    - ANET
+    - SMCI
+    - INTU
+    - ISRG
+    - LLY
+    - VRTX
+    - REGN
+    - MRNA
+    - DXCM
+    - COST
+    - LULU
+    - DECK
+    - CMG
+    - ETSY
+    - XYZ
+    - PYPL
+    - COIN
+    - HOOD
+    - SOFI
+    - RIVN
+    - ENPH
+    - FSLR
+    - CAT
+    - DE
+    - GE
+    - BA
+    - DAL
+    - JPM
+    - GS
+    - V
+    - MA
+  exclude: []
+
+scan:
+  interval_minutes: 30          # wie oft neue Kaufkandidaten gesucht werden
+  manage_interval_minutes: 5    # wie oft offene Positionen (Stops/Ziele) geprüft werden
+  history_days: 400             # Kurshistorie für technische Analyse (Kalendertage)
+  max_candidates_for_news: 12   # nur die technisch besten N werden per News geprüft
+  min_price: 5.0
+  min_avg_dollar_volume: 20000000   # Mindest-Tagesumsatz in USD (Liquidität)
+
+strategy:
+  # "Mittleres Risiko": annualisierte Volatilität muss in diesem Band liegen
+  min_volatility: 0.22
+  max_volatility: 0.70
+  weight_technical: 0.55
+  weight_news: 0.45
+  buy_threshold: 0.62           # Gesamt-Score (0..1), ab dem gekauft wird
+  min_news_sentiment: 0.15      # Nachrichtenlage muss mindestens leicht positiv sein
+  min_news_articles: 1          # ohne aktuelle Nachrichten kein Kauf
+  exit_on_negative_news: true
+  negative_news_exit_sentiment: -0.5
+
+risk:
+  max_positions: 8
+  max_position_pct: 0.12        # max. 12 % des Depotwerts pro Aktie
+  risk_per_trade_pct: 0.01      # max. 1 % des Depotwerts Verlust bis zum Stop-Loss
+  cash_reserve_pct: 0.10        # 10 % bleiben immer als Cash
+  stop_atr_multiple: 2.0        # Stop-Loss = Einstieg - 2 x ATR
+  take_profit_r_multiple: 3.0   # Teilgewinn bei +3R (R = Abstand Einstieg-Stop)
+  partial_take_profit_fraction: 0.5   # Anteil, der beim Kursziel verkauft wird
+  trailing_activation_r: 1.0    # Trailing-Stop wird ab +1R aktiv
+  trailing_atr_multiple: 2.5    # Trailing-Stop = Hoch seit Einstieg - 2.5 x ATR
+  max_holding_days: 20          # Zeit-Stop ...
+  min_progress_pct: 0.02        # ... wenn nach 20 Tagen weniger als +2 % erreicht
+  daily_loss_limit_pct: 0.03    # bei -3 % Depotwert am Tag keine neuen Käufe
+  reentry_cooldown_days: 3
+  max_new_positions_per_cycle: 2
+  min_order_value: 25           # in Kontowährung
+  quantity_decimals: 2          # Bruchstücke (Trading 212 erlaubt Fractional Shares)
+
+news:
+  provider: finnhub             # finnhub (FINNHUB_API_KEY nötig) | yahoo (ohne Key)
+  lookback_days: 5
+  max_articles: 15
+  analyzer: claude              # claude (ANTHROPIC_API_KEY nötig) | lexicon (ohne Key)
+  claude_model: claude-opus-5-5
+  claude_effort: medium         # low | medium | high
+
+market_hours:
+  timezone: America/New_York
+  open: "09:35"                 # 5 Minuten nach Börseneröffnung (Eröffnungsvolatilität meiden)
+  close: "15:50"
+
+paths:
+  state_file: data/state.json
+  journal_file: data/trades.csv
+  instruments_cache: data/instruments.json
+  log_file: logs/bot.log
